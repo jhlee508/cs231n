@@ -55,7 +55,11 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+
+        self.params['W1'] = np.random.normal(0.0, weight_scale, (input_dim, hidden_dim))
+        self.params['b1'] = np.zeros(hidden_dim)
+        self.params['W2'] = np.random.normal(0.0, weight_scale, (hidden_dim, num_classes))
+        self.params['b2'] = np.zeros(num_classes)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -88,7 +92,9 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        z1, cache1 = affine_forward(X, self.params['W1'], self.params['b1'])
+        a1, cache2 = relu_forward(z1)
+        scores, cache3 = affine_forward(a1, self.params['W2'], self.params['b2'])
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -112,7 +118,26 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        W1 = self.params['W1']
+        b1 = self.params['b1']
+        W2 = self.params['W2']
+        b2 = self.params['b2']
+        
+        # Softmax Loss 계산
+        loss, dscores = softmax_loss(scores, y)
+
+        # L2 정규화
+        loss += 0.5 * self.reg * (np.sum(np.square(W1)) + np.sum(np.square(W2)))
+        
+        # backward
+        da1, dW2, db2 = affine_backward(dscores, cache3)
+        grads['W2'] = dW2 + self.reg * W2
+        grads['b2'] = db2
+        dz1 = relu_backward(da1, cache2)
+        _, dW1, db1 = affine_backward(dz1, cache1)
+        grads['W1'] = dW1 + self.reg * W1
+        grads['b1'] = db1
+
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

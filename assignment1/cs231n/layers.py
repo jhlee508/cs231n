@@ -28,8 +28,10 @@ def affine_forward(x, w, b):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
-
+    # out = x * w + b
+    # x.shape = (2, 4, 5, 6), w.shape = (120, 3), b.shape = (3,)
+    out = x.reshape(x.shape[0], -1).dot(w) + b 
+    
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -60,8 +62,10 @@ def affine_backward(dout, cache):
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
+    
+    dx = dout.dot(w.T).reshape(x.shape[0], x.shape[1], -1)
+    dw = x.reshape(x.shape[0], -1).T.dot(dout)
+    db = np.dot(dout.T, np.ones(x.shape[0]))
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -86,8 +90,8 @@ def relu_forward(x):
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
+    
+    out = np.maximum(x, np.zeros(x.shape))
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -114,7 +118,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dx = (x > 0) * dout.reshape(dout.shape[0], -1)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -145,7 +149,20 @@ def svm_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_train = x.shape[0]
+
+    correct_x = np.choose(y, x.T).reshape(-1, 1) # (N, ) -> (N, 1)
+    margins = x - correct_x + 1
+    loss_matrix = margins * (margins > 0)
+    loss = np.sum(loss_matrix) - num_train # -1 빼기, j != y_i
+    loss /= num_train
+
+    dx = np.zeros(x.shape)
+    dx[margins > 0] = 1 # 포함 j = y_i
+    cnt = np.sum(dx, axis=1) # 포함 j = y_i
+    dx[np.arange(num_train), y] -= cnt # 오프셋
+    dx /= num_train
+    
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -176,7 +193,15 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_train = x.shape[0]
+
+    p = np.exp(x) / np.sum(np.exp(x), axis = 1, keepdims=True)
+    loss = np.sum(-np.log(p[np.arange(num_train), y])) 
+    p[np.arange(num_train), y] -= 1
+
+    # average
+    loss = loss / num_train
+    dx = p / num_train
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
