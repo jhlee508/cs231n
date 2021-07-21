@@ -25,7 +25,7 @@ def affine_forward(x, w, b):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = x.reshape(x.shape[0], -1).dot(w) + b 
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -57,7 +57,9 @@ def affine_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dx = dout.dot(w.T).reshape(x.shape[0], x.shape[1], -1)
+    dw = x.reshape(x.shape[0], -1).T.dot(dout)
+    db = np.dot(dout.T, np.ones(x.shape[0]))
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -82,7 +84,7 @@ def relu_forward(x):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = np.maximum(x, np.zeros(x.shape))
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -108,7 +110,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dx = (x > 0) * dout.reshape(dout.shape[0], -1)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -137,7 +139,43 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    ####################################
+    # version 1: not numerical stable  #
+    ####################################
+    
+    # num_train = x.shape[0]
+    # p = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+    # loss = np.sum(-np.log(p[np.arange(num_train), y])) / num_train
+
+    # p[np.arange(num_train), y] -= 1
+    # dx = p / num_train
+
+    ####################################
+    # version 2: better than version 1 #
+    ####################################
+    
+    num_train = x.shape[0]
+    # avoid exp explode
+    scores = x - np.max(x, axis=1, keepdims=True)
+    normalized_scores = np.exp(scores) / np.sum(np.exp(scores), axis=1, keepdims=True)
+    loss = np.sum(-np.log(normalized_scores[np.arange(num_train), y])) / num_train
+
+    normalized_scores[np.arange(num_train), y] -= 1
+    dx = normalized_scores / num_train
+    
+    ####################################
+    # version 3: better than version 2 #
+    ####################################
+    
+    # num_train = x.shape[0]
+    # shifted_logits = x - np.max(x, axis=1, keepdims=True)
+    # Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)
+    # log_probs = shifted_logits - np.log(Z)
+    # probs = np.exp(log_probs)
+    # loss = -np.sum(log_probs[np.arange(num_train), y]) / num_train
+   
+    # probs[np.arange(num_train), y] -= 1
+    # dx = probs / num_train
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
