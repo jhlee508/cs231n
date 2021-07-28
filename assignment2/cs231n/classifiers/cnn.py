@@ -63,7 +63,12 @@ class ThreeLayerConvNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        self.params["W1"] = np.random.randn(num_filters, input_dim[0], filter_size, filter_size) * weight_scale
+        self.params['b1'] = np.zeros(num_filters)
+        self.params['W2'] = np.random.randn(num_filters * input_dim[1] * input_dim[2] // 4, hidden_dim) * weight_scale
+        self.params['b2'] = np.zeros(hidden_dim)
+        self.params['W3'] = np.random.randn(hidden_dim, num_classes) * weight_scale
+        self.params['b3'] = np.zeros(num_classes)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -102,7 +107,9 @@ class ThreeLayerConvNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        X, cache1 = conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)       
+        X, cache2 = affine_relu_forward(X, W2, b2)
+        scores, cache3 = affine_forward(X, W3, b3)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -125,7 +132,17 @@ class ThreeLayerConvNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        loss, dx = softmax_loss(scores, y)
+        loss += 0.5 * self.reg * (np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)))
+        dx, dW3, db3 = affine_backward(dx, cache3)
+        grads['W3'] = dW3 + self.reg * W3
+        grads['b3'] = db3
+        dx, dW2, db2 = affine_relu_backward(dx, cache2)
+        grads['W2'] = dW2 + self.reg * W2
+        grads['b2'] = db2
+        dx, dW1, db1 = conv_relu_pool_backward(dx, cache1)
+        grads['W1'] = dW1 + self.reg * W1
+        grads['b1'] = db1
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
