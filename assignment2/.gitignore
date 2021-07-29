@@ -1,0 +1,7 @@
+*.so
+*.c
+build/*
+
+notebook_images
+datasets
+__pycache__
