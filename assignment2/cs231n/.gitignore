@@ -1,0 +1,10 @@
+*.so
+*.c
+build/*
+
+notebook_images
+
+__pycache__
+
+
+
