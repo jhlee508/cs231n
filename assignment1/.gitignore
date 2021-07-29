@@ -1,0 +1,6 @@
+collectSubmission.sh
+makepdf.py
+README.md
+
+cs231n/__pycache__
+cs231n/datasets
