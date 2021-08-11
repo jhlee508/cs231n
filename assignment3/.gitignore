@@ -1,0 +1,10 @@
+*.npz
+*.sh
+*.key
+
+images
+cs231n/datasets
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
