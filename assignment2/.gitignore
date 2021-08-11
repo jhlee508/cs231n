@@ -5,3 +5,6 @@ build/*
 notebook_images
 datasets
 __pycache__
+
+*.pdf
+*zip
