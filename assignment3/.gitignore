@@ -3,6 +3,9 @@
 *.key
 
 images
+results
+pretrained_model
+data
 cs231n/datasets
 
 # Byte-compiled / optimized / DLL files
